@@ -1,0 +1,172 @@
+#include <stdio.h>
+#include <string.h>
+
+// Define a structure for patient data
+struct Patient {
+    int patientID;
+    char name[100];
+    char disease[100];
+    char doctorName[100];  // Added doctor name
+    char joinDate[20];
+    char dischargeDate[20];
+    float roomCharge;
+    float doctorFee;
+    float medicationCost;
+    float surgeryCost;
+    float xRayCost;
+    float otherCharges;
+    float insuranceCoverage;
+    float totalAmount;
+};
+
+// Function prototypes
+void addPatient(struct Patient patients[], int *patientCount);
+void removePatient(struct Patient patients[], int *patientCount, int patientID);
+float calculateTotalAmount(struct Patient *p);
+void displayPatientBill(struct Patient *p);
+
+int main() {
+    struct Patient patients[100];  // Array to store up to 100 patients
+    int patientCount = 0;
+    int choice;
+    int patientID;
+
+    while (1) {
+        // Menu for the user
+        printf("\n--- Hospital Management System ---\n");
+        printf("1. Add Patient\n");
+        printf("2. Remove Patient\n");
+        printf("3. Display Patient Bill\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addPatient(patients, &patientCount);
+                break;
+            case 2:
+                printf("Enter patient ID to remove: ");
+                scanf("%d", &patientID);
+                removePatient(patients, &patientCount, patientID);
+                break;
+            case 3:
+                printf("Enter patient ID to display bill: ");
+                scanf("%d", &patientID);
+                if (patientID <= patientCount && patientID > 0) {
+                    displayPatientBill(&patients[patientID - 1]);
+                } else {
+                    printf("Invalid patient ID!\n");
+                }
+                break;
+            case 4:
+                printf("Exiting the system...\n");
+                return 0;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+// Function to add a new patient
+void addPatient(struct Patient patients[], int *patientCount) {
+    struct Patient newPatient;
+    
+    // Assign patient ID
+    newPatient.patientID = *patientCount + 1;
+
+    // Input patient details
+    printf("Enter patient's name: ");
+    getchar();  // To clear the newline left by previous scanf
+    fgets(newPatient.name, sizeof(newPatient.name), stdin);
+    newPatient.name[strcspn(newPatient.name, "\n")] = 0;  // Remove newline
+
+    printf("Enter doctor's name: ");
+    fgets(newPatient.doctorName, sizeof(newPatient.doctorName), stdin);
+    newPatient.doctorName[strcspn(newPatient.doctorName, "\n")] = 0;  // Remove newline
+
+    printf("Enter patient's disease: ");
+    fgets(newPatient.disease, sizeof(newPatient.disease), stdin);
+    newPatient.disease[strcspn(newPatient.disease, "\n")] = 0;
+
+    printf("Enter joining date (DD/MM/YYYY): ");
+    fgets(newPatient.joinDate, sizeof(newPatient.joinDate), stdin);
+    newPatient.joinDate[strcspn(newPatient.joinDate, "\n")] = 0;
+
+    printf("Enter discharge date (DD/MM/YYYY): ");
+    fgets(newPatient.dischargeDate, sizeof(newPatient.dischargeDate), stdin);
+    newPatient.dischargeDate[strcspn(newPatient.dischargeDate, "\n")] = 0;
+
+    printf("Enter room charge: ");
+    scanf("%f", &newPatient.roomCharge);
+
+    printf("Enter doctor fee: ");
+    scanf("%f", &newPatient.doctorFee);
+
+    printf("Enter medication cost: ");
+    scanf("%f", &newPatient.medicationCost);
+
+    printf("Enter surgery cost: ");
+    scanf("%f", &newPatient.surgeryCost);
+
+    printf("Enter X-ray charges: ");
+    scanf("%f", &newPatient.xRayCost);
+
+    printf("Enter other charges (e.g., lab tests, procedures): ");
+    scanf("%f", &newPatient.otherCharges);
+
+    printf("Enter insurance coverage percentage (e.g., 80 for 80%%): ");
+    scanf("%f", &newPatient.insuranceCoverage);
+
+    // Calculate total amount
+    newPatient.totalAmount = calculateTotalAmount(&newPatient);
+
+    // Add patient to the array
+    patients[*patientCount] = newPatient;
+    (*patientCount)++;
+
+    printf("Patient added successfully with ID: %d\n", newPatient.patientID);
+}
+
+// Function to remove a patient by ID
+void removePatient(struct Patient patients[], int *patientCount, int patientID) {
+    if (patientID <= *patientCount && patientID > 0) {
+        // Shift all patients after the removed one
+        for (int i = patientID - 1; i < *patientCount - 1; i++) {
+            patients[i] = patients[i + 1];
+        }
+        (*patientCount)--;  // Decrease patient count
+        printf("Patient with ID %d removed successfully.\n", patientID);
+    } else {
+        printf("Invalid patient ID!\n");
+    }
+}
+
+// Function to calculate total amount for a patient
+float calculateTotalAmount(struct Patient *p) {
+    float total = p->roomCharge + p->doctorFee + p->medicationCost + p->surgeryCost + p->xRayCost + p->otherCharges;
+    float insuranceDiscount = total * (p->insuranceCoverage / 100);
+    return total - insuranceDiscount;
+}
+
+// Function to display the bill of a patient
+void displayPatientBill(struct Patient *p) {
+    printf("\n--- Patient Bill Summary ---\n");
+    printf("Patient ID: %d\n", p->patientID);
+    printf("Name: %s\n", p->name);
+    printf("Doctor's Name: %s\n", p->doctorName);  // Display doctor's name
+    printf("Disease: %s\n", p->disease);
+    printf("Joining Date: %s\n", p->joinDate);
+    printf("Discharge Date: %s\n", p->dischargeDate);
+    printf("Room Charge: %.2f\n", p->roomCharge);
+    printf("Doctor Fee: %.2f\n", p->doctorFee);
+    printf("Medication Cost: %.2f\n", p->medicationCost);
+    printf("Surgery Cost: %.2f\n", p->surgeryCost);
+    printf("X-ray Charges: %.2f\n", p->xRayCost);
+    printf("Other Charges: %.2f\n", p->otherCharges);
+    printf("Total Amount Before Insurance: %.2f\n", p->roomCharge + p->doctorFee + p->medicationCost + p->surgeryCost + p->xRayCost + p->otherCharges);
+    printf("Insurance Coverage: %.2f%%\n", p->insuranceCoverage);
+    printf("Final Bill (After Insurance): %.2f\n", p->totalAmount);
+}
